@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Puff Hop 3D — Rainbow Runner (All Ages)</title>
+<meta name="description" content="A cute 3D runner everyone will love. Free, family-friendly, works on Phone, Tablet, PC. Xbox controller supported." />
+<style>
+  :root{ --bg:#87ceeb; --ink:#1e2a3a; --card:rgba(255,255,255,.92); --accent:#ff5fa2; --accent2:#4fc3f7; --good:#37d67a; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:var(--bg); font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif; color:var(--ink); overscroll-behavior:none; }
+  #app{ position:fixed; inset:0; }
+  canvas{ display:block; }
+  .hud{ position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:flex-start; padding:calc(10px + env(safe-area-inset-top)) 12px 0; pointer-events:none; z-index:5; }
+  .pill{ background:var(--card); border-radius:999px; padding:8px 14px; font-weight:800; box-shadow:0 4px 16px rgba(0,0,0,.15); display:flex; gap:10px; align-items:center; backdrop-filter:blur(6px); }
+  .pill small{ font-weight:600; opacity:.65; }
+  #score{ font-variant-numeric:tabular-nums; font-size:18px; }
+  .btns{ display:flex; gap:8px; pointer-events:auto; }
+  button.icon{ width:44px; height:44px; border-radius:50%; border:0; background:var(--card); font-size:20px; font-weight:900; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.18); }
+  button.icon:active{ transform:scale(.94); }
+  .overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:18px; z-index:10; background:radial-gradient(120% 100% at 50% 0%, rgba(255,255,255,.55), rgba(135,206,235,.2) 45%, rgba(30,42,58,.45)); }
+  .card{ width:min(520px,100%); background:var(--card); border-radius:24px; padding:22px 20px 18px; box-shadow:0 20px 60px rgba(0,0,0,.25); text-align:center; backdrop-filter:blur(10px); max-height:92vh; overflow:auto; }
+  .badge{ display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; border-radius:10px; padding:6px 10px; font-weight:800; letter-spacing:.02em; font-size:13px; }
+  .badge b{ background:#fff; color:#111; border-radius:6px; padding:1px 7px; }
+  h1{ margin:10px 0 4px; font-size:clamp(28px,6vw,42px); line-height:1; letter-spacing:-.02em; }
+  h1 span{ background:linear-gradient(90deg,#ff5fa2,#ffb300,#37d67a,#4fc3f7,#a78bfa); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  p.sub{ margin:6px 0 12px; color:#41566f; font-size:15px; }
+  .cta{ display:flex; gap:10px; margin:14px 0 8px; }
+  .cta button{ flex:1; border:0; border-radius:16px; padding:16px; font-size:18px; font-weight:900; cursor:pointer; }
+  #playBtn{ background:linear-gradient(180deg,#37d67a,#1eaf5c); color:#fff; box-shadow:0 8px 20px rgba(30,175,92,.4); }
+  #playBtn:active{ transform:scale(.98); }
+  #howBtn{ background:#eef3f8; color:var(--ink); }
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:left; font-size:13.5px; margin:12px 0; }
+  .grid div{ background:#f2f6fb; border-radius:14px; padding:10px 11px; }
+  .kbd{ background:#111; color:#fff; border-radius:6px; padding:1px 6px; font-size:12px; }
+  .touch-ui{ position:fixed; left:0; right:0; bottom:calc(10px + env(safe-area-inset-bottom)); display:none; justify-content:space-between; padding:0 14px; z-index:6; pointer-events:none; }
+  body.touch .touch-ui{ display:flex; }
+  .tcluster{ display:flex; gap:10px; pointer-events:auto; }
+  .tbtn{ width:68px; height:68px; border-radius:50%; border:0; font-size:26px; background:rgba(255,255,255,.9); box-shadow:0 8px 24px rgba(0,0,0,.22); font-weight:900; touch-action:none; }
+  .tbtn:active{ transform:scale(.93); background:#fff; }
+  #toast{ position:fixed; left:50%; bottom:100px; transform:translateX(-50%); background:#111; color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; font-size:14px; opacity:0; transition:.25s; z-index:20; pointer-events:none; }
+  #gameover{ display:none; }
+  .stars-row{ font-size:22px; letter-spacing:.15em; }
+  .small{ font-size:12.5px; color:#5a7187; line-height:1.5; }
+  .platforms{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0 0; }
+  .platforms span{ background:#111; color:#fff; font-size:12px; font-weight:700; padding:6px 10px; border-radius:999px; }
+  a{ color:#1976d2; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="hud">
+  <div class="pill"><span>⭐ <span id="score">0</span></span><small id="best">BEST 0</small></div>
+  <div class="pill"><span>🌈 <span id="dist">0m</span></span><small id="level">LV 1</small></div>
+  <div class="btns">
+    <button class="icon" id="soundBtn" title="sound">🔊</button>
+    <button class="icon" id="pauseBtn" title="pause">⏸</button>
+  </div>
+</div>
+
+<div class="touch-ui">
+  <div class="tcluster">
+    <button class="tbtn" id="leftBtn">◀</button>
+    <button class="tbtn" id="rightBtn">▶</button>
+  </div>
+  <div class="tcluster">
+    <button class="tbtn" id="downBtn">▼</button>
+    <button class="tbtn" id="upBtn">▲</button>
+  </div>
+</div>
+
+<div class="overlay" id="menu">
+  <div class="card">
+    <div class="badge"><b>E</b> EVERYONE · ALL AGES · NO ADS NEEDED</div>
+    <h1><span>Puff Hop 3D</span> 🩷</h1>
+    <p class="sub">The super-cute rainbow runner everyone will love! Hop, slide & giggle. Collect stars, dodge grumpy blocks.</p>
+    <div class="cta">
+      <button id="playBtn">▶ PLAY</button>
+      <button id="howBtn">❓ HOW</button>
+    </div>
+    <div id="how" style="display:none" class="grid">
+      <div>📱 <b>Phone / Tablet</b><br/>Swipe ◀ ▶ to move<br/>Swipe ▲ / tap ▲ to jump<br/>Swipe ▼ to slide</div>
+      <div>⌨️ <b>PC</b><br/><span class="kbd">◀</span> <span class="kbd">▶</span> move<br/><span class="kbd">Space</span>/<span class="kbd">▲</span> jump<br/><span class="kbd">▼</span>/<span class="kbd">S</span> slide</div>
+      <div>🎮 <b>Xbox pad</b><br/>D-pad / stick to move<br/><span class="kbd">A</span> jump · <span class="kbd">B</span> slide<br/>Start = pause</div>
+      <div>🕹️ <b>Goal</b><br/>⭐ = +10 pts<br/>Avoid red grumps!<br/>Survive = speed up!</div>
+    </div>
+    <div class="platforms">
+      <span>📱 Phone</span><span>📟 Tablet</span><span>💻 PC / Web</span><span>🎮 Xbox pad ready</span><span>🔁 PSP-style pick-up & play</span>
+    </div>
+    <p class="small" style="margin-top:12px">Note: PSP is discontinued (2014) and Xbox needs store certification, so this build is <b>web-first</b> — it plays instantly on phone/tablet/PC, works with an Xbox controller, and the same code ports to native wrappers (Capacitor / PWA → store, Unity/Godot re-export for console). No downloads, kid-safe, no chat, no purchases.</p>
+    <p class="small">High score: <b id="menuBest">0</b> · Made with Three.js · 60fps mobile-friendly</p>
+  </div>
+</div>
+
+<div class="overlay" id="gameover">
+  <div class="card">
+    <div style="font-size:48px">🥹💫</div>
+    <h1 style="font-size:32px">Oopsy! Try again?</h1>
+    <div class="stars-row" id="newBest" style="display:none">🏆 NEW BEST! 🏆</div>
+    <p class="sub">Score <b id="finalScore" style="font-size:24px">0</b> · <span id="finalDist">0m</span> · ⭐ <span id="finalStars">0</span></p>
+    <div class="cta">
+      <button id="retryBtn" style="background:linear-gradient(180deg,#ff5fa2,#e0447c);color:#fff">↻ HOP AGAIN</button>
+      <button id="menuBtn" style="background:#eef3f8">MENU</button>
+    </div>
+    <p class="small">Tip: stay middle when unsure. Jump early for low fences, slide under floating planks!</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ---------- tiny audio (no assets, kid-safe bleeps) ----------
+let audioOn = true, actx=null;
+function beep(freq=600,dur=0.12,type='sine',vol=0.18,slide=0){
+  if(!audioOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended') actx.resume();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq, actx.currentTime);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide), actx.currentTime+dur);
+    g.gain.setValueAtTime(vol, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+const sJump=()=>beep(420,0.18,'sine',0.2,380);
+const sStar=()=>{beep(880,0.1,'triangle',0.18); setTimeout(()=>beep(1320,0.14,'triangle',0.16),70);};
+const sHit=()=>beep(180,0.3,'sawtooth',0.16,-120);
+const sClick=()=>beep(650,0.07,'square',0.08);
+
+// ---------- detect touch ----------
+if(('ontouchstart' in window)||navigator.maxTouchPoints>0) document.body.classList.add('touch');
+
+// ---------- three setup ----------
+const app=document.getElementById('app');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87ceeb);
+scene.fog=new THREE.Fog(0x87ceeb, 30, 95);
+
+const camera=new THREE.PerspectiveCamera(60, innerWidth/innerHeight, .1, 200);
+camera.position.set(0,4.2,7.5); camera.lookAt(0,1.2,-6);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+app.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x88aa66,0.95));
+const sun=new THREE.DirectionalLight(0xffffff,1.35);
+sun.position.set(6,12,4); sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-12; sun.shadow.camera.right=12;
+sun.shadow.camera.top=12; sun.shadow.camera.bottom=-12;
+scene.add(sun);
+
+// ground - rainbow runner track
+const LANES=[-2.2,0,2.2];
+function stripeTexture(){
+  const c=document.createElement('canvas'); c.width=128; c.height=512;
+  const g=c.getContext('2d');
+  const cols=['#ff5fa2','#ffb300','#fff35c','#37d67a','#4fc3f7','#a78bfa'];
+  const w=c.width/cols.length;
+  cols.forEach((col,i)=>{ g.fillStyle=col; g.fillRect(i*w,0,w,c.height); });
+  g.fillStyle='rgba(255,255,255,.85)';
+  for(let y=0;y<c.height;y+=64) g.fillRect(0,y,c.width,6);
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1,6);
+  return t;
+}
+const trackTex=stripeTexture();
+const track=new THREE.Mesh(
+  new THREE.PlaneGeometry(8.5,220),
+  new THREE.MeshLambertMaterial({map:trackTex})
+);
+track.rotation.x=-Math.PI/2; track.position.z=-80; track.receiveShadow=true;
+scene.add(track);
+
+const grassMat=new THREE.MeshLambertMaterial({color:0x7ed957});
+const grassL=new THREE.Mesh(new THREE.PlaneGeometry(60,220),grassMat);
+grassL.rotation.x=-Math.PI/2; grassL.position.set(-34.2,-0.02,-80); grassL.receiveShadow=true; scene.add(grassL);
+const grassR=grassL.clone(); grassR.position.x=34.2; scene.add(grassR);
+
+// lane dividers (white dashes, scroll illusion via texture offset)
+function makeCloud(){
+  const grp=new THREE.Group();
+  const m=new THREE.MeshLambertMaterial({color:0xffffff});
+  for(let i=0;i<3;i++){
+    const s=new THREE.Mesh(new THREE.SphereGeometry(0.7+Math.random()*0.6,12,12),m);
+    s.position.set(i*0.9-0.9, Math.random()*0.4, 0); s.scale.y=0.7; grp.add(s);
+  }
+  return grp;
+}
+function makeTree(){
+  const g=new THREE.Group();
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.3,1.2,8), new THREE.MeshLambertMaterial({color:0x8b5a2b}));
+  trunk.position.y=0.6; trunk.castShadow=true; g.add(trunk);
+  const top=new THREE.Mesh(new THREE.SphereGeometry(0.9,12,12), new THREE.MeshLambertMaterial({color:[0x2ecc71,0x27ae60,0x58d68d][Math.floor(Math.random()*3)]}));
+  top.position.y=1.7; top.castShadow=true; g.add(top);
+  return g;
+}
+
+// ---------- player: cute Puff ----------
+const player=new THREE.Group();
+const bodyMat=new THREE.MeshStandardMaterial({color:0xfff6a5, roughness:.5});
+const body=new THREE.Mesh(new THREE.SphereGeometry(0.65,24,24),bodyMat);
+body.position.y=0.85; body.castShadow=true; player.add(body);
+const eyeMat=new THREE.MeshBasicMaterial({color:0x1e2a3a});
+const eyeL=new THREE.Mesh(new THREE.SphereGeometry(0.11,10,10),eyeMat); eyeL.position.set(-0.22,1.05,0.55); player.add(eyeL);
+const eyeR=eyeL.clone(); eyeR.position.x=0.22; player.add(eyeR);
+const cheekMat=new THREE.MeshBasicMaterial({color:0xff8fb3});
+const chL=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,8),cheekMat); chL.position.set(-0.38,0.85,0.48); player.add(chL);
+const chR=chL.clone(); chR.position.x=0.38; player.add(chR);
+const smile=new THREE.Mesh(new THREE.TorusGeometry(0.16,0.03,8,16,Math.PI), new THREE.MeshBasicMaterial({color:0x1e2a3a}));
+smile.position.set(0,0.88,0.6); smile.rotation.x=Math.PI; smile.rotation.z=Math.PI; player.add(smile);
+// little feet
+const footMat=new THREE.MeshStandardMaterial({color:0xff5fa2});
+const fL=new THREE.Mesh(new THREE.SphereGeometry(0.18,10,10),footMat); fL.position.set(-0.28,0.18,0.1); fL.castShadow=true; player.add(fL);
+const fR=fL.clone(); fR.position.x=0.28; player.add(fR);
+scene.add(player);
+
+// shadow blob helper (in case shadows off on low power)
+player.position.set(0,0,0);
+
+// ---------- entities ----------
+const obstacles=[], starsArr=[], scenery=[];
+let spawnTimer=0;
+
+function spawnObstacle(){
+  const lane=Math.floor(Math.random()*3);
+  const r=Math.random();
+  let mesh, kind;
+  if(r<0.42){ // low fence - JUMP
+    kind='low';
+    mesh=new THREE.Group();
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.7,0.4), new THREE.MeshStandardMaterial({color:0xff4757,roughness:.6}));
+    bar.position.y=0.45; bar.castShadow=true; mesh.add(bar);
+    const e1=new THREE.Mesh(new THREE.SphereGeometry(0.16,10,10), new THREE.MeshBasicMaterial({color:0x111})); e1.position.set(-0.3,0.55,0.22); mesh.add(e1);
+    const e2=e1.clone(); e2.position.x=0.3; mesh.add(e2);
+  } else if(r<0.72){ // tall grump - CHANGE LANE
+    kind='tall';
+    mesh=new THREE.Group();
+    const b=new THREE.Mesh(new THREE.BoxGeometry(1.7,1.7,0.7), new THREE.MeshStandardMaterial({color:0xff4757,roughness:.6}));
+    b.position.y=0.95; b.castShadow=true; mesh.add(b);
+    const e1=new THREE.Mesh(new THREE.SphereGeometry(0.18,10,10), new THREE.MeshBasicMaterial({color:0xfff})); e1.position.set(-0.35,1.2,0.37); mesh.add(e1);
+    const e2=e1.clone(); e2.position.x=0.35; mesh.add(e2);
+    const p1=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8), new THREE.MeshBasicMaterial({color:0x111})); p1.position.set(-0.35,1.2,0.53); mesh.add(p1);
+    const p2=p1.clone(); p2.position.x=0.35; mesh.add(p2);
+  } else { // floating plank - SLIDE
+    kind='high';
+    mesh=new THREE.Group();
+    const p=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.45,0.5), new THREE.MeshStandardMaterial({color:0x5d6dfd,roughness:.6}));
+    p.position.y=1.45; p.castShadow=true; mesh.add(p);
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.92,0.12,0.52), new THREE.MeshBasicMaterial({color:0xffe93c}));
+    stripe.position.y=1.45; mesh.add(stripe);
+  }
+  // avoid spawning tall on all 3 lanes same z (unfair) — we spawn 1-2 per wave
+  mesh.position.set(LANES[lane],0,-65);
+  mesh.userData={kind,lane,passed:false};
+  scene.add(mesh); obstacles.push(mesh);
+
+  // sometimes second obstacle different lane
+  if(Math.random()<0.35 && state.speed>9){
+    let lane2=(lane+1+Math.floor(Math.random()*2))%3;
+    const c=mesh.clone(); c.position.x=LANES[lane2]; scene.add(c); obstacles.push(c);
+  }
+}
+function spawnStar(lane){
+  const g=new THREE.Group();
+  const geo=new THREE.OctahedronGeometry(0.38);
+  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0xffd93c,emissive:0xaa7700,emissiveIntensity:.35,roughness:.3,metalness:.4}));
+  m.castShadow=true; g.add(m);
+  const x = lane!==undefined?LANES[lane]:LANES[Math.floor(Math.random()*3)];
+  const y = Math.random()<0.3?1.9:0.9;
+  g.position.set(x,y,-65);
+  scene.add(g); starsArr.push(g);
+}
+function spawnScenery(){
+  const side=Math.random()<0.5?-1:1;
+  const obj=Math.random()<0.5?makeTree():makeCloud();
+  if(obj.children[0] && obj.children[0].geometry.type==='SphereGeometry' && obj.children.length===3 && !obj.children[0].castShadow){
+    // cloud
+    obj.position.set(side*(7+Math.random()*10), 6+Math.random()*4, -70-Math.random()*20);
+  } else {
+    obj.position.set(side*(6+Math.random()*8), 0, -70-Math.random()*20);
+  }
+  scene.add(obj); scenery.push(obj);
+}
+
+// ---------- game state ----------
+const state={mode:'menu', score:0, stars:0, dist:0, speed:8, lane:1, vy:0, y:0, sliding:0, invuln:0, time:0};
+let best=+(localStorage.getItem('puffhop_best')||0);
+const $=id=>document.getElementById(id);
+$('best').textContent='BEST '+best; $('menuBest').textContent=best;
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.opacity=1; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity=0,1600); }
+
+function reset(){
+  for(const o of obstacles) scene.remove(o); obstacles.length=0;
+  for(const s of starsArr) scene.remove(s); starsArr.length=0;
+  Object.assign(state,{score:0,stars:0,dist:0,speed:8,lane:1,vy:0,y:0,sliding:0,invuln:1.2,time:0});
+  player.position.set(0,0,0); player.scale.set(1,1,1);
+  updateHUD();
+}
+function startGame(){
+  sClick(); reset();
+  state.mode='play';
+  $('menu').style.display='none'; $('gameover').style.display='none';
+  toast('Collect ⭐! Dodge red grumps!');
+}
+function endGame(){
+  state.mode='over'; sHit();
+  player.scale.set(1.3,0.5,1.3);
+  const nb=state.score>best;
+  if(nb){ best=Math.floor(state.score); localStorage.setItem('puffhop_best',best); }
+  $('finalScore').textContent=Math.floor(state.score);
+  $('finalDist').textContent=Math.floor(state.dist)+'m';
+  $('finalStars').textContent=state.stars;
+  $('newBest').style.display=nb?'block':'none';
+  $('best').textContent='BEST '+best; $('menuBest').textContent=best;
+  setTimeout(()=>{ $('gameover').style.display='flex'; },650);
+}
+function updateHUD(){
+  $('score').textContent=Math.floor(state.score);
+  $('dist').textContent=Math.floor(state.dist)+'m';
+  $('level').textContent='LV '+(1+Math.floor(state.dist/250));
+}
+
+// ---------- input: keyboard + touch swipe + buttons + xbox pad ----------
+function move(d){ if(state.mode!=='play')return; state.lane=Math.min(2,Math.max(0,state.lane+d)); beep(500+d*80,0.06,'square',0.06); }
+function jump(){ if(state.mode!=='play')return; if(state.y<=0.01){ state.vy=8.2; state.sliding=0; sJump(); } }
+function slide(){ if(state.mode!=='play')return; if(state.y>0.05){ state.vy=-12; } state.sliding=0.7; beep(300,0.12,'sine',0.12,-120); }
+
+addEventListener('keydown',e=>{
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') move(-1);
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') move(1);
+  if(e.key==='ArrowUp'||e.key==='w'||e.key==='W'||e.key===' ') jump();
+  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') slide();
+  if(e.key==='p'||e.key==='P'||e.key==='Escape') togglePause();
+  if(e.key==='Enter'&&state.mode!=='play') startGame();
+});
+$('leftBtn').addEventListener('pointerdown',e=>{e.preventDefault();move(-1);});
+$('rightBtn').addEventListener('pointerdown',e=>{e.preventDefault();move(1);});
+$('upBtn').addEventListener('pointerdown',e=>{e.preventDefault();jump();});
+$('downBtn').addEventListener('pointerdown',e=>{e.preventDefault();slide();});
+
+// swipe
+let sx=0,sy=0;
+renderer.domElement.addEventListener('touchstart',e=>{ const t=e.changedTouches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+renderer.domElement.addEventListener('touchend',e=>{
+  const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+  if(Math.abs(dx)<24&&Math.abs(dy)<24){ jump(); return; }
+  if(Math.abs(dx)>Math.abs(dy)) move(dx>0?1:-1);
+  else dy<0?jump():slide();
+},{passive:true});
+let mDown=false,mx=0,my=0;
+renderer.domElement.addEventListener('mousedown',e=>{mDown=true;mx=e.clientX;my=e.clientY;});
+renderer.domElement.addEventListener('mouseup',e=>{
+  if(!mDown)return; mDown=false;
+  const dx=e.clientX-mx, dy=e.clientY-my;
+  if(Math.abs(dx)<8&&Math.abs(dy)<8) return;
+  if(Math.abs(dx)>Math.abs(dy)) move(dx>0?1:-1); else dy<0?jump():slide();
+});
+
+// Xbox / generic gamepad polling
+let padPrev={a:false,b:false,l:false,r:false,start:false};
+function pollPad(){
+  try{
+    const pads=navigator.getGamepads?navigator.getGamepads():[];
+    const gp=[...pads].find(p=>p&&p.connected);
+    if(!gp||state.mode!=='play') return;
+    const ax=gp.axes[0]||0, btn=i=>gp.buttons[i]?.pressed;
+    const a=btn(0),b=btn(1)||btn(2),start=btn(9);
+    const l=btn(14)||ax<-0.5, r=btn(15)||ax>0.5;
+    if(l&&!padPrev.l) move(-1);
+    if(r&&!padPrev.r) move(1);
+    if(a&&!padPrev.a) jump();
+    if(b&&!padPrev.b) slide();
+    if(start&&!padPrev.start) togglePause();
+    // dpad up/down also jump/slide
+    if(btn(12)&&!padPrev.u) jump();
+    if(btn(13)&&!padPrev.d) slide();
+    padPrev={a,b,l,r,start,u:btn(12),d:btn(13)};
+  }catch(e){}
+}
+
+// UI buttons
+$('playBtn').onclick=startGame;
+$('retryBtn').onclick=startGame;
+$('menuBtn').onclick=()=>{ $('gameover').style.display='none'; $('menu').style.display='flex'; state.mode='menu'; };
+$('howBtn').onclick=()=>{ sClick(); const h=$('how'); h.style.display=h.style.display==='none'?'grid':'none'; };
+$('soundBtn').onclick=e=>{ audioOn=!audioOn; e.target.textContent=audioOn?'🔊':'🔇'; if(audioOn)sClick(); };
+let paused=false;
+function togglePause(){
+  if(state.mode!=='play')return;
+  paused=!paused; $('pauseBtn').textContent=paused?'▶':'⏸'; toast(paused?'Paused':'Go!');
+}
+$('pauseBtn').onclick=togglePause;
+
+// ---------- loop ----------
+const clock=new THREE.Clock();
+function collide(px,py,sliding, o){
+  const oz=o.position.z;
+  if(oz>1.2||oz<-1.2) return false;
+  if(Math.abs(o.position.x-LANES[state.lane])>0.9) return false;
+  const k=o.userData.kind;
+  if(k==='low') return py<0.9;
+  if(k==='tall') return true; // must not be in same lane (checked above) unless jumping over? no — tall is full height
+  if(k==='high') return !(sliding>0||py<0.15); // slide under (or stay low)
+  return true;
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.05);
+  pollPad();
+
+  // idle menu bounce
+  if(state.mode==='menu'){
+    const t=performance.now()*0.002;
+    player.position.y=Math.abs(Math.sin(t))*0.35;
+    player.rotation.y=Math.sin(t*0.5)*0.3;
+    body.scale.set(1,1+Math.sin(t*2)*0.04,1);
+    trackTex.offset.y+=dt*0.25;
+    renderer.render(scene,camera);
+    return;
+  }
+  if(state.mode==='over'){
+    // gentle tumble
+    player.rotation.x+=dt*2;
+    for(const o of obstacles){ o.position.z+=state.speed*dt*0.25; }
+    renderer.render(scene,camera);
+    return;
+  }
+  if(paused){ renderer.render(scene,camera); return; }
+
+  // play
+  state.time+=dt;
+  state.speed=Math.min(20, 8+state.dist*0.012);
+  state.dist+=state.speed*dt;
+  state.score+=state.speed*dt*1.2;
+  if(state.invuln>0) state.invuln-=dt;
+  if(state.sliding>0) state.sliding-=dt;
+
+  // lane easing
+  const tx=LANES[state.lane];
+  player.position.x+=(tx-player.position.x)*Math.min(1,dt*12);
+
+  // jump physics
+  if(state.y>0||state.vy!==0){
+    state.vy-=24*dt; state.y+=state.vy*dt;
+    if(state.y<=0){ state.y=0; state.vy=0; beep(220,0.05,'sine',0.05); }
+  }
+  player.position.y=state.y+(state.sliding>0?-0.25:0)+Math.abs(Math.sin(state.time*10))*0.06;
+  const squish=state.sliding>0?0.62:1+Math.min(0.18,Math.abs(state.vy)*0.015);
+  player.scale.set(1/Math.sqrt(squish),squish,1/Math.sqrt(squish));
+  fL.position.z=fR.position.z=Math.sin(state.time*14)*0.15;
+
+  // scroll world
+  trackTex.offset.y+=dt*state.speed*0.12;
+  spawnTimer-=dt;
+  if(spawnTimer<=0){
+    spawnTimer=Math.max(0.55, 1.35-state.speed*0.035)+Math.random()*0.5;
+    spawnObstacle();
+    if(Math.random()<0.75) spawnStar();
+    if(Math.random()<0.9) spawnScenery();
+  }
+
+  // move + collide + cleanup
+  for(let i=obstacles.length-1;i>=0;i--){
+    const o=obstacles[i];
+    o.position.z+=state.speed*dt;
+    if(o.userData.kind!=='tall') o.rotation.y=Math.sin(state.time*3+i)*0.06;
+    if(!o.userData.passed&&o.position.z>1.5){ o.userData.passed=true; state.score+=5; }
+    if(state.invuln<=0&&collide(player.position.x,state.y,state.sliding,o)){ endGame(); break; }
+    if(o.position.z>10){ scene.remove(o); obstacles.splice(i,1); }
+  }
+  for(let i=starsArr.length-1;i>=0;i--){
+    const s=starsArr[i];
+    s.position.z+=state.speed*dt; s.rotation.y+=dt*3;
+    s.position.y+=Math.sin(state.time*4+i)*dt*0.5;
+    const dx=s.position.x-player.position.x, dy=s.position.y-(state.y+0.9), dz=s.position.z-0;
+    if(dx*dx+dy*dy+dz*dz<1.15){
+      scene.remove(s); starsArr.splice(i,1);
+      state.stars++; state.score+=10; sStar();
+      // happy pop
+      body.scale.set(1.2,0.8,1.2); setTimeout(()=>body.scale.set(1,1,1),120);
+      if(state.stars%10===0) toast(state.stars+' ⭐! Amazing!');
+    }
+    else if(s.position.z>10){ scene.remove(s); starsArr.splice(i,1); }
+  }
+  for(let i=scenery.length-1;i>=0;i--){
+    const sc=scenery[i]; sc.position.z+=state.speed*dt*0.9;
+    if(sc.position.z>12){ scene.remove(sc); scenery.splice(i,1); }
+  }
+
+  // blink invuln
+  bodyMat.transparent=state.invuln>0;
+  bodyMat.opacity=state.invuln>0?(Math.sin(state.time*20)>0?0.4:1):1;
+
+  // camera follows lane slightly + day cycle tint
+  camera.position.x+=(player.position.x*0.45-camera.position.x)*Math.min(1,dt*5);
+  camera.lookAt(player.position.x*0.6,1.2,-6);
+
+  if(Math.floor(state.time*2)!==Math.floor((state.time-dt)*2)) updateHUD();
+  renderer.render(scene,camera);
+}
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+for(let i=0;i<10;i++) spawnScenery(), scenery[i].position.z=-10-i*7;
+updateHUD();
+animate();
+</script>
+</body>
+</html>
