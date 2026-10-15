@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TryBox AI — $1 Trial Toolkit</title>
+<meta name="description" content="3 simple AI tools sellers & creators use daily. $1 for 7 days, then $9/mo. Cancel anytime." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="nav">
+  <div class="logo">📦 TryBox AI</div>
+  <nav><a href="#tools">Tools</a><a href="#affiliates">Deals</a><a href="#pricing">Pricing</a></nav>
+  <button id="ctaTop" class="btn primary">Start $1 Trial</button>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="pill">No credit card to try • Cancel in 1 click • Built on free AI</div>
+    <h1>3 AI tools people <u>actually use daily</u>.</h1>
+    <p class="sub">Modeled on top-converting affiliate categories (ecom, creator, jobs) — but 100% original copy. Generate a product listing, viral hook, or resume bullet in 10 seconds.</p>
+    <div class="cta-row">
+      <button class="btn primary big" onclick="startTrial()">Try 7 days for $1</button>
+      <a class="btn ghost big" href="#tools">Live demo ↓</a>
+    </div>
+    <div class="social">★ 4.8 from early testers • 2,100+ generations • $9/mo after trial</div>
+  </div>
+  <div class="card demo-card">
+    <div class="card-head">🔴 LIVE • Product Lister</div>
+    <div id="heroDemo">Handmade soy candle, vanilla + sandalwood, $24...<br><br>→ <b>Title:</b> Cozy Vanilla Sandalwood Soy Candle – 40hr Burn, Gift-Ready<br>→ <b>Bullets:</b> hand-poured, non-toxic, reusable jar<br>→ <b>CTA:</b> Free shipping over $35</div>
+  </div>
+</section>
+
+<main id="tools" class="tools">
+  <div class="tabs">
+    <button class="tab active" data-tab="ecom">🛍️ Product Lister</button>
+    <button class="tab" data-tab="creator">🎬 Viral Hooks</button>
+    <button class="tab" data-tab="jobs">💼 Resume Fixer</button>
+  </div>
+
+  <div class="panel active" id="panel-ecom">
+    <h2>Product Lister <span class="tag">for Etsy / Shopify</span></h2>
+    <label>What are you selling?</label>
+    <input id="in-ecom" placeholder="e.g. handmade soy candle vanilla sandalwood $24" value="handmade soy candle, vanilla sandalwood, $24" />
+    <label>Tone</label>
+    <select id="tone-ecom"><option>Persuasive + SEO</option><option>Fun TikTok style</option><option>Luxury minimal</option></select>
+    <button class="btn primary" onclick="generate('ecom')">Generate listing →</button>
+    <pre id="out-ecom" class="out">Output appears here. Free demo: 5 runs, then $1 trial.</pre>
+  </div>
+
+  <div class="panel" id="panel-creator">
+    <h2>Viral Hooks <span class="tag">TikTok / Reels / Shorts</span></h2>
+    <label>Your topic?</label>
+    <input id="in-creator" placeholder="e.g. budget meal prep for students" value="budget meal prep for students" />
+    <button class="btn primary" onclick="generate('creator')">Generate 5 hooks →</button>
+    <pre id="out-creator" class="out">Output appears here.</pre>
+  </div>
+
+  <div class="panel" id="panel-jobs">
+    <h2>Resume Fixer <span class="tag">get interviews</span></h2>
+    <label>Paste boring bullet:</label>
+    <input id="in-jobs" placeholder="e.g. responsible for customer service" value="responsible for customer service at coffee shop" />
+    <button class="btn primary" onclick="generate('jobs')">Rewrite with metrics →</button>
+    <pre id="out-jobs" class="out">Output appears here.</pre>
+  </div>
+
+  <div class="usage">Free runs left today: <b id="runsLeft">5</b> • <a href="#pricing">Unlock unlimited for $1</a></div>
+</main>
+
+<section id="affiliates" class="aff">
+  <h2>Recommended stack <span class="disc">affiliate disclosure: we may earn a commission</span></h2>
+  <p>Don't copy top affiliates. <i>Model</i> them: recommend 3 tools your users already need, add your own links in <code>app.js → AFFILIATE_LINKS</code>.</p>
+  <div class="grid3">
+    <div class="acard"><h3>🌐 Sell it</h3><p>Shopify / Etsy + cheap hosting to launch in a day.</p><a data-aff="hosting" href="#" target="_blank" rel="nofollow sponsored">Get hosting deal →</a></div>
+    <div class="acard"><h3>🤖 Scale it</h3><p>Upgrade to pro AI credits when you outgrow free tier.</p><a data-aff="ai" href="#" target="_blank" rel="nofollow sponsored">Get AI pro deal →</a></div>
+    <div class="acard"><h3>💰 Outsource it</h3><p>Fiverr editor for your viral clips $15.</p><a data-aff="gig" href="#" target="_blank" rel="nofollow sponsored">Find editor →</a></div>
+  </div>
+</section>
+
+<section id="pricing" class="pricing">
+  <h2>One plan. Stupid simple.</h2>
+  <div class="price-card">
+    <div class="price-top">$1 <span>first 7 days, then $9/mo</span></div>
+    <ul>
+      <li>✅ Unlimited generations (fair-use)</li>
+      <li>✅ All 3 tools + 1 new tool monthly</li>
+      <li>✅ Copy-paste templates + commercial use</li>
+      <li>✅ Cancel in 1 click, keep exports</li>
+    </ul>
+    <!-- PASTE YOUR STRIPE PAYMENT LINK HERE. Free stack: Stripe Payment Link / Gumroad / LemonSqueezy -->
+    <button class="btn primary big" onclick="startTrial()">Start $1 Trial</button>
+    <div class="fine">Replace STRIPE_LINK in app.js with your link. Test mode is free.</div>
+    <div id="memberStatus" class="member">Status: Free demo</div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 TryBox AI • <a href="#">Terms</a> • <a href="#">Privacy</a> • Built with free tools: GitHub Pages + Pollinations.ai + Stripe Links. No login server needed for MVP.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
