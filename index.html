@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080817" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%B3%3C/text%3E%3C/svg%3E" />
+  <title>MUSE — No Edges</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game-shell">
+    <canvas id="world" aria-label="Infinite creative world game"></canvas>
+    <div class="vignette"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Muse home"><span class="brand-mark">✳</span><span>MUSE</span><span class="brand-line"></span><span class="brand-sub">NO EDGES</span></a>
+      <div class="world-label"><span class="live-dot"></span><span id="region-name">THE OPEN</span><span class="label-divider">/</span><span id="coordinates">0 : 0</span></div>
+      <div class="top-actions">
+        <button id="help-button" class="icon-button" aria-label="How to play" title="How to play">?</button>
+        <button id="reset-button" class="icon-button" aria-label="Start a new world" title="New world">↻</button>
+      </div>
+    </header>
+
+    <section class="mission-card" aria-label="Optional milestone">
+      <div class="mission-icon">✧</div>
+      <div class="mission-copy"><div class="eyebrow">A LITTLE MILESTONE <span>OPTIONAL</span></div><div class="mission-title" id="mission-title">Find your first echoes</div><div class="progress-track"><i id="progress-fill"></i></div></div>
+      <div class="mission-count"><strong id="echo-count">0</strong><small>/ 12</small></div>
+    </section>
+
+    <div class="side-note"><span class="note-rule"></span><span>MAKE A PLACE<br>THAT FEELS LIKE YOU</span></div>
+
+    <div class="bottom-ui">
+      <div class="tool-dock" aria-label="Creation tools">
+        <div class="dock-heading"><span>MAKE</span><span class="dock-hint">PICK A TOOL</span></div>
+        <div class="tools">
+          <button class="tool active" data-tool="bloom" title="Bloom — place a living light [1]"><span class="tool-art bloom-art">✿</span><span class="tool-text">BLOOM</span><kbd>1</kbd></button>
+          <button class="tool" data-tool="orb" title="Lantern — place a floating light [2]"><span class="tool-art orb-art">◉</span><span class="tool-text">LANTERN</span><kbd>2</kbd></button>
+          <button class="tool" data-tool="ribbon" title="Ribbon — draw a trail [3]"><span class="tool-art ribbon-art">〰</span><span class="tool-text">RIBBON</span><kbd>3</kbd></button>
+          <button class="tool erase-tool" data-tool="erase" title="Erase your creations [X]"><span class="tool-art erase-art">⌫</span><span class="tool-text">ERASE</span><kbd>X</kbd></button>
+        </div>
+      </div>
+      <div class="play-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span class="hint-copy">TO WANDER</span><span class="hint-dot">·</span><span class="keycap space-key">SPACE</span><span class="hint-copy">CALL THE LIGHT</span></div>
+      <div class="echo-toast" id="echo-toast">ECHO FOUND <span>+1</span></div>
+    </div>
+
+    <div class="touch-controls" aria-label="Movement controls">
+      <button data-dir="up" aria-label="Move up">▲</button>
+      <div><button data-dir="left" aria-label="Move left">◀</button><button data-dir="down" aria-label="Move down">▼</button><button data-dir="right" aria-label="Move right">▶</button></div>
+    </div>
+    <button class="call-button" id="call-button"><span>✧</span> CALL</button>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <div class="modal-backdrop" id="welcome-modal">
+      <section class="modal welcome-modal">
+        <div class="modal-spark">✳</div>
+        <div class="eyebrow">A WORLD WITHOUT EDGES</div>
+        <h1>Go where<br><em>you feel.</em></h1>
+        <p>Wander an endless, living canvas. Gather echoes, leave little lights, and make this place your own. There is no map to finish and no wrong way through.</p>
+        <button class="primary-button" id="begin-button">STEP INTO THE OPEN <span>↗</span></button>
+        <div class="welcome-foot"><span>WASD / ARROWS TO WANDER</span><span>CLICK TO CREATE</span></div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop hidden" id="help-modal">
+      <section class="modal help-modal">
+        <button class="close-modal" data-close="help-modal" aria-label="Close">×</button>
+        <div class="eyebrow">YOUR WORLD, YOUR WAY</div><h2>A few ways in.</h2>
+        <div class="help-row"><span class="help-symbol">⌖</span><div><strong>Wander without a map</strong><small>WASD or arrow keys. This world keeps unfolding.</small></div></div>
+        <div class="help-row"><span class="help-symbol">✿</span><div><strong>Leave something behind</strong><small>Choose a tool, then click or tap anywhere to create.</small></div></div>
+        <div class="help-row"><span class="help-symbol">✧</span><div><strong>Call the light</strong><small>Space or CALL draws nearby echoes toward you.</small></div></div>
+        <div class="help-row"><span class="help-symbol">∞</span><div><strong>There is no finish line</strong><small>Collect echoes if you like. Or simply keep going.</small></div></div>
+        <button class="primary-button" data-close="help-modal">GOT IT <span>↗</span></button>
+      </section>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
