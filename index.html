@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#100d24">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23100d24'/%3E%3Ctext x='50' y='73' text-anchor='middle' font-size='72' fill='%23ff9ac6'%3E%E2%9C%B3%3C/text%3E%3C/svg%3E">
+  <title>MUSE: Afterglow — Rhythm Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="wordmark" href="#" aria-label="Muse Afterglow home"><span class="brand-mark">✳</span> MUSE<span class="wordmark-light">/AFTERGLOW</span></a>
+      <div class="top-meta"><span class="live-dot"></span> ORIGINAL RHYTHM RUNNER <span class="meta-divider">/</span> NO. 01</div>
+      <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound"><span class="sound-icon">♪</span><span id="soundLabel">SOUND ON</span></button>
+    </header>
+
+    <section class="game-wrap" aria-label="Muse rhythm game">
+      <div class="stage-frame">
+        <canvas id="gameCanvas" aria-label="Rhythm runner game canvas"></canvas>
+        <div class="stage-grain"></div>
+        <div class="stage-vignette"></div>
+        <div class="hud" id="hud" hidden>
+          <div class="hud-left"><div class="hud-label">SCORE</div><div class="score-value" id="score">000000</div></div>
+          <div class="hud-center"><div class="song-name">AFTERGLOW <span>— ORIGINAL MIX</span></div><div class="progress-track"><i id="progress"></i></div></div>
+          <div class="hud-right"><div class="combo-value"><span id="combo">0</span><small>COMBO</small></div><div class="health-bar"><i id="health"></i></div></div>
+        </div>
+        <div class="overlay intro-overlay" id="introOverlay">
+          <div class="intro-copy">
+            <div class="eyebrow"><span class="eyebrow-line"></span> THE NIGHT IS YOURS <span class="eyebrow-line"></span></div>
+            <h1>CHASE THE<br><em>AFTERGLOW.</em></h1>
+            <p>A little rhythm. A lot of feeling.<br>Find the beat and keep the night alive.</p>
+            <div class="difficulty-row" role="group" aria-label="Choose difficulty">
+              <button class="difficulty active" data-difficulty="chill">CHILL <small>●</small></button>
+              <button class="difficulty" data-difficulty="rush">RUSH <small>●●</small></button>
+              <button class="difficulty" data-difficulty="fever">FEVER <small>●●●</small></button>
+            </div>
+            <button class="play-button" id="playButton"><span>START RUN</span><b>↗</b></button>
+            <div class="start-note">NO DOWNLOADS. NO PRESSURE. JUST PLAY.</div>
+          </div>
+          <div class="hero-sticker">GOOD<br>VIBES<br><span>ONLY</span><b>✳</b></div>
+          <div class="controls-hint"><span class="keycap">F</span><span class="keycap">J</span><span>OR TAP LEFT / RIGHT</span></div>
+        </div>
+        <div class="overlay pause-overlay" id="pauseOverlay" hidden>
+          <div class="pause-card"><div class="eyebrow">TAKE YOUR TIME</div><h2>PAUSED<span>.</span></h2><p>The beat will wait for you.</p><button class="play-button" id="resumeButton"><span>BACK TO IT</span><b>↗</b></button><button class="text-button" id="quitButton">END THIS RUN</button></div>
+        </div>
+        <div class="overlay result-overlay" id="resultOverlay" hidden>
+          <div class="result-card"><div class="eyebrow" id="resultEyebrow">NIGHT COMPLETE</div><h2 id="resultTitle">THAT WAS<br><em>GLOWING.</em></h2><div class="result-score"><span>FINAL SCORE</span><b id="finalScore">000000</b></div><div class="result-stats"><div><b id="bestCombo">0</b><span>BEST COMBO</span></div><div><b id="accuracy">0%</b><span>ACCURACY</span></div><div><b id="rank">C</b><span>RANK</span></div></div><button class="play-button" id="againButton"><span>RUN IT BACK</span><b>↗</b></button><button class="text-button" id="homeButton">BACK TO THE BEGINNING</button></div>
+        </div>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+        <div class="mobile-controls" id="mobileControls" hidden><button data-lane="0" aria-label="Hit left lane">←<small>LEFT</small></button><button data-lane="1" aria-label="Hit right lane">→<small>RIGHT</small></button></div>
+      </div>
+      <footer class="stage-footer"><div><span class="footer-dot"></span> ORIGINAL MUSIC EXPERIENCE</div><div class="footer-center">A SMALL GAME FOR THE IN-BETWEEN MOMENTS</div><div>BUILT TO BE PLAYED <span class="footer-star">✳</span></div></footer>
+    </section>
+    <section class="below-stage"><div class="how-title"><span>01</span> FOLLOW THE FEELING</div><p>Hit notes as they cross the glow line. Left and right have their own beat — trust your ears, catch the rhythm, and let the combo build.</p><div class="how-keys"><span class="keycap">F</span><span class="keycap">J</span><span class="keycap">SPACE</span><small>HIT LEFT</small><small>HIT RIGHT</small><small>PAUSE</small></div></section>
+    <footer class="page-footer"><span>© 2026 MUSE / AFTERGLOW</span><span>MADE FOR THE JOY OF PLAYING.</span></footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

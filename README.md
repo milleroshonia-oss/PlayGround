@@ -16,3 +16,16 @@
 - 👤 [Explore the creator's projects](https://omgithub.com/milleroshonia-oss).
 - 🌍 [Create with OMGithub](https://omgithub.com).
 <!-- omgithub:readme:end -->
+
+## MUSE: Afterglow
+
+A small, original two-lane rhythm runner that runs directly in the browser—no build step or external game assets required.
+
+### Play
+
+Open `index.html` in a browser, or serve this folder with `python3 -m http.server 3002` and visit `http://localhost:3002`.
+
+- Choose **Chill**, **Rush**, or **Fever**, then select **Start Run**.
+- Press **F** / **J**, or tap the left / right controls, as notes reach the glow line.
+- Press **Space** or **Escape** to pause. Sound is synthesized in-browser and can be toggled off.
+
