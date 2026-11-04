@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#101114" />
+  <title>Pocket Reset — Clear the noise</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root { color-scheme: dark; --bg:#101114; --panel:#191a1f; --line:#2b2c33; --muted:#898a93; --ink:#f6f5f0; --lime:#c8f169; --violet:#b8a2ff; --coral:#ff806d; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 50% 4%,#24232b 0,transparent 42%),var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif; display:flex; flex-direction:column; }
+    button { font:inherit; }
+    .topbar { width:min(1120px,100%); margin:0 auto; padding:24px 28px; display:flex; align-items:center; justify-content:space-between; }
+    .brand { display:flex; align-items:center; gap:11px; font:700 15px 'Space Grotesk',sans-serif; letter-spacing:-.3px; }
+    .brand-mark { width:32px;height:32px; border-radius:10px;display:grid;place-items:center;background:var(--lime);color:#171915;font-size:19px;transform:rotate(-7deg); }
+    .brand small { display:block;color:#777981;font:500 9px 'DM Mono',monospace;letter-spacing:1.6px;margin-top:3px; }
+    .day-label { color:#8d8e96;font:11px 'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase; }
+    main { flex:1; width:min(1000px,100%); margin:auto; padding:5px 28px 30px; display:flex; align-items:center; }
+    .layout { width:100%; display:grid; grid-template-columns:260px minmax(0,1fr); gap:34px; align-items:center; }
+    .intro { padding:8px 0; }
+    .eyebrow { color:var(--lime);font:500 10px 'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px; }
+    .eyebrow:before { content:'';width:19px;height:1px;background:var(--lime); }
+    h1 { font:600 clamp(38px,5vw,56px)/.98 'Space Grotesk',sans-serif;letter-spacing:-3px;margin:18px 0 16px; }
+    h1 em { font-style:normal;color:var(--lime); }
+    .intro-copy { color:#a0a0a8; font-size:14px;line-height:1.7;max-width:250px;margin:0 0 26px; }
+    .howto { border-top:1px solid #2b2c31;padding-top:18px; }
+    .howto-title { color:#777982;font:10px 'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px; }
+    .how-row { display:flex;gap:10px;align-items:center;color:#c5c5ca;font-size:12px;margin:10px 0; }
+    .key { width:21px;height:21px;display:grid;place-items:center;border:1px solid #44454c;border-radius:6px;color:#dedee1;font:10px 'DM Mono',monospace; }
+    .play-area { min-width:0; position:relative; }
+    .game-shell { position:relative;border:1px solid #34353d;background:#17181d;border-radius:23px;padding:24px;box-shadow:0 25px 80px #0006;overflow:hidden; }
+    .game-shell:before { content:'';position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--lime),var(--violet),var(--coral)); }
+    .game-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:21px; }
+    .game-name { color:#92939b;font:10px 'DM Mono',monospace;letter-spacing:1.4px;text-transform:uppercase; }
+    .daily-badge { border:1px solid #383940;border-radius:20px;padding:7px 10px;color:#b1b1b8;font:9px 'DM Mono',monospace;letter-spacing:.7px; }
+    .stats { display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:16px; }
+    .stat { border:1px solid #2e2f36;background:#1d1e24;border-radius:12px;padding:11px 13px; }
+    .stat-label { color:#787982;font:9px 'DM Mono',monospace;letter-spacing:1.1px;text-transform:uppercase; }
+    .stat-value { display:flex;align-items:center;gap:5px;margin-top:5px;font:600 19px 'Space Grotesk',sans-serif; }
+    .stat-value.score { color:var(--lime); }.stat-value.combo { color:var(--violet); }.hearts { color:var(--coral);font-size:14px;letter-spacing:2px; }
+    .timer-track { height:4px;background:#303138;border-radius:9px;margin:0 0 18px;overflow:hidden; }
+    .timer-fill { height:100%;width:100%;background:var(--lime);border-radius:9px;transition:width .15s linear,background .2s; }
+    .task-card { min-height:216px;position:relative;border-radius:18px;padding:25px 25px 20px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:#e8e5dc;color:#18191c;transition:transform .18s,background .2s; }
+    .task-card:after { content:'';position:absolute;width:190px;height:190px;border:1px solid #1c1d2013;border-radius:50%;right:-65px;bottom:-105px;box-shadow:0 0 0 18px #1c1d2009,0 0 0 38px #1c1d2006; }
+    .task-card.pop { animation:pop .25s ease-out; }
+    @keyframes pop { from { transform:translateY(8px) scale(.985);opacity:.65 } to { transform:none;opacity:1 } }
+    .task-card.good { background:#dbf29b; }.task-card.bad { background:#ffc2b5; }
+    .task-meta { display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1; }
+    .task-number { color:#6f706d;font:10px 'DM Mono',monospace;letter-spacing:1px; }
+    .task-mark { width:29px;height:29px;display:grid;place-items:center;border:1px solid #2223;border-radius:50%;font-size:14px; }
+    .task-copy { position:relative;z-index:1; }
+    .task-kicker { color:#696a67;font:10px 'DM Mono',monospace;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:8px; }
+    .task-text { font:600 clamp(22px,3vw,30px)/1.14 'Space Grotesk',sans-serif;letter-spacing:-1px;max-width:450px; }
+    .task-sub { color:#777873;font-size:11px;margin-top:10px; }
+    .answer-label { color:#777982;font:9px 'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;margin:19px 0 10px; }
+    .answers { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
+    .answer { min-height:62px;border:1px solid #33343b;border-radius:12px;background:#202127;color:#d9d9dd;cursor:pointer;text-align:left;padding:10px 12px;transition:transform .12s,border-color .12s,background .12s;touch-action:manipulation; }
+    .answer:hover:not(:disabled) { transform:translateY(-2px);border-color:#74757b;background:#282930; }
+    .answer:active:not(:disabled) { transform:scale(.97); }
+    .answer:disabled { cursor:default; }
+    .answer-top { display:flex;align-items:center;justify-content:space-between;gap:6px; }
+    .answer-name { font:600 11px 'Space Grotesk',sans-serif; }
+    .answer-key { color:#777982;font:9px 'DM Mono',monospace; }
+    .answer-desc { color:#888991;font-size:9px;margin-top:5px; }
+    .answer.focus .answer-name { color:var(--lime); }.answer.defer .answer-name { color:var(--violet); }.answer.clear .answer-name { color:var(--coral); }
+    .feedback { height:20px;text-align:center;padding-top:9px;color:#9b9ba3;font:10px 'DM Mono',monospace;letter-spacing:.5px; }
+    .footerline { display:flex;justify-content:space-between;align-items:center;color:#676870;font:9px 'DM Mono',monospace;letter-spacing:.5px;margin-top:5px; }
+    .sound-btn { border:0;background:transparent;color:#777982;padding:6px;cursor:pointer;font-size:14px; }
+    .sound-btn:hover { color:white; }
+    .overlay { position:absolute;z-index:5;inset:0;display:grid;place-items:center;background:#101114c9;backdrop-filter:blur(7px);padding:24px;transition:opacity .2s; }
+    .overlay.hidden { opacity:0;pointer-events:none; }
+    .overlay-panel { width:min(370px,100%);border:1px solid #41424a;background:#202127;border-radius:18px;padding:28px;text-align:center;box-shadow:0 25px 80px #0009; }
+    .overlay-icon { width:46px;height:46px;border-radius:14px;margin:0 auto 15px;background:#2c3321;color:var(--lime);display:grid;place-items:center;font-size:22px; }
+    .overlay h2 { font:600 27px 'Space Grotesk',sans-serif;letter-spacing:-1px;margin:0 0 8px; }
+    .overlay p { color:#a5a5ad;font-size:12px;line-height:1.65;margin:0 auto 19px;max-width:275px; }
+    .primary { border:0;border-radius:10px;background:var(--lime);color:#181a14;padding:12px 19px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer;min-width:145px;transition:transform .12s,filter .12s; }
+    .primary:hover { transform:translateY(-2px);filter:brightness(1.05); }.primary:active { transform:scale(.97); }
+    .bestline { color:#85868e;font:9px 'DM Mono',monospace;margin-top:14px;letter-spacing:.6px; }
+    .toast { position:absolute;top:15px;left:50%;transform:translate(-50%,-10px);background:#292a31;border:1px solid #41424a;color:#ededf0;border-radius:22px;padding:8px 14px;font:10px 'DM Mono',monospace;opacity:0;pointer-events:none;transition:all .2s;z-index:4;white-space:nowrap; }
+    .toast.show { opacity:1;transform:translate(-50%,0); }
+    .bottom-note { width:min(1000px,100%);margin:0 auto;padding:0 28px 18px;color:#55565e;display:flex;justify-content:space-between;font:9px 'DM Mono',monospace;letter-spacing:.6px; }
+    @media (max-width:760px) {
+      .topbar { padding:17px 19px; }.day-label { font-size:9px; }
+      main { align-items:flex-start;padding:12px 16px 22px; }.layout { grid-template-columns:1fr;gap:18px; }
+      .intro { padding:0;display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:12px; }
+      .eyebrow { grid-column:1/-1;font-size:9px; } h1 { font-size:37px;margin:10px 0 0;letter-spacing:-2px; }
+      .intro-copy { font-size:11px;line-height:1.45;margin:0 0 3px;max-width:140px; }
+      .howto { display:none; }.game-shell { padding:17px;border-radius:19px; }.game-top { margin-bottom:14px; }
+      .stats { margin-bottom:12px;gap:7px; }.stat { padding:9px 10px; }.stat-value { font-size:17px; }
+      .task-card { min-height:174px;padding:19px; }.task-text { font-size:25px; }.task-sub { font-size:10px; }
+      .answer { padding:9px 8px;min-height:60px; }.answer-name { font-size:10px; }.answer-desc { font-size:8px; }
+      .bottom-note { padding:0 19px 12px; }
+    }
+    @media (max-width:380px) { .intro-copy { display:none; }.answers { gap:6px; }.game-shell { padding:13px; }.task-card { min-height:160px; }.answer-key { display:none; } }
+    @media (prefers-reduced-motion:reduce) { *,*:before,*:after { animation-duration:.01ms!important;transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">↗</div><div>pocket reset<small>A SMALL GAME FOR A BUSY BRAIN</small></div></div>
+    <div class="day-label" id="dateLabel">DAILY RESET · TODAY</div>
+  </header>
+  <main>
+    <div class="layout">
+      <section class="intro" aria-label="About Pocket Reset">
+        <div class="eyebrow">A 45-second brain break</div>
+        <h1>Clear the<br><em>noise.</em></h1>
+        <p class="intro-copy">A little focus feels good. Sort the everyday stuff before it sorts you.</p>
+        <div class="howto">
+          <div class="howto-title">Three simple moves</div>
+          <div class="how-row"><span class="key">1</span><span>Do it now — worth your focus</span></div>
+          <div class="how-row"><span class="key">2</span><span>Save it for later — not urgent</span></div>
+          <div class="how-row"><span class="key">3</span><span>Clear it out — just noise</span></div>
+        </div>
+      </section>
+      <section class="play-area" aria-label="Pocket Reset game">
+        <div class="game-shell">
+          <div class="game-top"><div class="game-name">The daily reset</div><div class="daily-badge" id="roundBadge">45 SEC · FREE PLAY</div></div>
+          <div class="stats">
+            <div class="stat"><div class="stat-label">Time</div><div class="stat-value" id="timeValue">45<span style="font:10px 'DM Mono';color:#85868e">s</span></div></div>
+            <div class="stat"><div class="stat-label">Score</div><div class="stat-value score" id="scoreValue">0</div></div>
+            <div class="stat"><div class="stat-label">Streak</div><div class="stat-value combo" id="comboValue">×0</div></div>
+          </div>
+          <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+          <div class="task-card" id="taskCard" aria-live="polite">
+            <div class="task-meta"><span class="task-number" id="taskNumber">READY WHEN YOU ARE</span><span class="task-mark" id="taskMark">✳</span></div>
+            <div class="task-copy"><div class="task-kicker" id="taskKicker">A little breathing room</div><div class="task-text" id="taskText">Make space for what matters.</div><div class="task-sub" id="taskSub">Pick a move. Trust your first instinct.</div></div>
+          </div>
+          <div class="answer-label">Where does it go?</div>
+          <div class="answers">
+            <button class="answer focus" data-choice="focus" aria-label="Do it now"><span class="answer-top"><span class="answer-name">DO NOW</span><span class="answer-key">[1]</span></span><span class="answer-desc">Worth your focus</span></button>
+            <button class="answer defer" data-choice="defer" aria-label="Save for later"><span class="answer-top"><span class="answer-name">LATER</span><span class="answer-key">[2]</span></span><span class="answer-desc">Not urgent yet</span></button>
+            <button class="answer clear" data-choice="clear" aria-label="Clear it out"><span class="answer-top"><span class="answer-name">CLEAR</span><span class="answer-key">[3]</span></span><span class="answer-desc">Just noise</span></button>
+          </div>
+          <div class="feedback" id="feedback" aria-live="polite">Tap a move or press 1, 2, or 3</div>
+          <div class="footerline"><span>ONE MINUTE. LESS MENTAL CLUTTER.</span><button class="sound-btn" id="soundButton" aria-label="Turn sound on" title="Sound off">♫</button></div>
+          <div class="toast" id="toast">NICE STREAK!</div>
+          <div class="overlay" id="overlay">
+            <div class="overlay-panel"><div class="overlay-icon" id="overlayIcon">✳</div><h2 id="overlayTitle">Ready for a reset?</h2><p id="overlayText">Sort the everyday stuff into DO NOW, LATER, or CLEAR. Build a streak and see how much headspace you can win in 45 seconds.</p><button class="primary" id="startButton">START MY RESET&nbsp; ↗</button><div class="bestline" id="bestLine">YOUR BEST&nbsp; · &nbsp;0 POINTS</div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="bottom-note"><span>BUILT FOR THE IN-BETWEEN MOMENTS</span><span>NO PRESSURE. JUST A RESET.</span></footer>
+  <script>
+    (() => {
+      const DURATION = 45;
+      const tasks = [
+        {type:'focus', text:'Pay the electricity bill', kicker:'A quick essential', sub:'Due tomorrow · takes two minutes'},
+        {type:'defer', text:'Try that new pasta recipe', kicker:'A nice-to-have', sub:'You saved it for a quieter day'},
+        {type:'clear', text:'Delete 38 blurry screenshots', kicker:'Digital clutter', sub:'You definitely do not need all 38'},
+        {type:'focus', text:'Reply to Sam about dinner', kicker:'A real person is waiting', sub:'A quick reply keeps the plan moving'},
+        {type:'clear', text:'Unsubscribe from sale alerts', kicker:'Inbox noise', sub:'Another “last chance” that is not'},
+        {type:'defer', text:'Read the article you bookmarked', kicker:'Good, but not right now', sub:'It can wait until you have a moment'},
+        {type:'focus', text:'Book your dentist checkup', kicker:'Future-you says thanks', sub:'It has been on your list for a while'},
+        {type:'clear', text:'Close 17 tabs you will never read', kicker:'Browser chaos', sub:'Keep the one that actually matters'},
+        {type:'defer', text:'Plan a weekend day trip', kicker:'Something to look forward to', sub:'No rush — pick a day later'},
+        {type:'focus', text:'Water the thirsty plants', kicker:'A small, kind thing', sub:'They have been waiting all morning'},
+        {type:'clear', text:'Mute the endless promo group', kicker:'Protect your attention', sub:'You can leave the noise behind'},
+        {type:'defer', text:'Organize the holiday photos', kicker:'A someday project', sub:'Worth doing, just not today'},
+        {type:'focus', text:'Send the project check-in', kicker:'One small next step', sub:'Your teammate needs the update'},
+        {type:'clear', text:'Remove the duplicate app icons', kicker:'Tiny digital mess', sub:'One version is plenty'},
+        {type:'defer', text:'Look up that pottery class', kicker:'A fun idea for later', sub:'Save it for when you have headspace'},
+        {type:'focus', text:'Put the laundry in the dryer', kicker:'The timer just went off', sub:'Future-you will appreciate this'},
+        {type:'clear', text:'Archive last month’s notifications', kicker:'Old news', sub:'Nothing here needs your attention'},
+        {type:'defer', text:'Start a list of books to read', kicker:'No deadline attached', sub:'A lovely idea for another time'},
+        {type:'focus', text:'Confirm tomorrow’s appointment', kicker:'Quick and time-sensitive', sub:'It only takes one tap'},
+        {type:'clear', text:'Turn off noisy app badges', kicker:'Less visual clutter', sub:'The red dots can wait forever'},
+        {type:'defer', text:'Find a new podcast to try', kicker:'For your next long walk', sub:'No need to choose this minute'},
+        {type:'focus', text:'Take your daily medication', kicker:'Take care of yourself', sub:'A small thing that matters now'},
+        {type:'clear', text:'Delete the expired coupon emails', kicker:'Inbox cleanup', sub:'That offer ended three weeks ago'},
+        {type:'defer', text:'Think about a desk refresh', kicker:'A maybe-someday thought', sub:'Nothing is broken — no hurry'},
+      ];
+      const $ = (id) => document.getElementById(id);
+      const card = $('taskCard'), overlay = $('overlay'), buttons = [...document.querySelectorAll('.answer')];
+      let running = false, answering = false, score = 0, combo = 0, seconds = DURATION, count = 0, timer = null, soundOn = false, audio;
+      let deck = [], deckIndex = 0;
+      const dayIndex = Math.floor(Date.now() / 86400000);
+      const date = new Date();
+      $('dateLabel').textContent = `DAILY RESET · ${date.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}).toUpperCase()}`;
+      const bestKey = 'pocket-reset-best';
+      const getBest = () => Number(localStorage.getItem(bestKey) || 0);
+      $('bestLine').innerHTML = `YOUR BEST&nbsp; · &nbsp;${getBest()} POINTS`;
+      function shuffleDeck() {
+        // Daily seed keeps the order consistent for everyone on the same day.
+        let seed = (dayIndex + 1) * 2654435761 >>> 0;
+        const rand = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+        deck = [...tasks];
+        for (let i=deck.length-1;i>0;i--) { const j=Math.floor(rand()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+        deckIndex = 0;
+      }
+      function nextTask() {
+        answering = false;
+        if (deckIndex >= deck.length) shuffleDeck();
+        const task = deck[deckIndex++];
+        $('taskNumber').textContent = `RESET ${String(count+1).padStart(2,'0')} · DAILY MIX`;
+        $('taskMark').textContent = task.type === 'focus' ? '↗' : task.type === 'defer' ? '◷' : '×';
+        $('taskKicker').textContent = task.kicker;
+        $('taskText').textContent = task.text;
+        $('taskSub').textContent = task.sub;
+        card.classList.remove('good','bad','pop'); void card.offsetWidth; card.classList.add('pop');
+        card.dataset.answer = task.type;
+      }
+      function updateUI() {
+        $('timeValue').innerHTML = `${seconds}<span style="font:10px 'DM Mono';color:#85868e">s</span>`;
+        $('scoreValue').textContent = score;
+        $('comboValue').textContent = `×${combo}`;
+        $('timerFill').style.width = `${seconds / DURATION * 100}%`;
+        $('timerFill').style.background = seconds <= 10 ? 'var(--coral)' : seconds <= 20 ? 'var(--violet)' : 'var(--lime)';
+      }
+      function startGame() {
+        score = 0; combo = 0; bestCombo = 0; seconds = DURATION; count = 0; running = true; shuffleDeck();
+        overlay.classList.add('hidden'); $('feedback').textContent = 'Tap a move or press 1, 2, or 3';
+        buttons.forEach(b => b.disabled = false); nextTask(); updateUI();
+        clearInterval(timer); timer = setInterval(() => { seconds--; updateUI(); if(seconds <= 0) endGame(); },1000);
+      }
+      function endGame() {
+        if(!running) return; running=false; clearInterval(timer); buttons.forEach(b => b.disabled = true);
+        const oldBest = getBest(); if(score > oldBest) localStorage.setItem(bestKey,score);
+        $('overlayIcon').textContent = score > oldBest ? '✦' : '↗';
+        $('overlayTitle').textContent = score > oldBest ? 'New personal best!' : 'Reset complete.';
+        $('overlayText').textContent = `${score} points · ${count} things sorted · best streak ×${bestCombo}. A little more headspace, one small decision at a time.`;
+        $('startButton').textContent = 'PLAY AGAIN  ↗'; $('bestLine').innerHTML = `YOUR BEST&nbsp; · &nbsp;${Math.max(score,oldBest)} POINTS`;
+        overlay.classList.remove('hidden'); $('feedback').textContent='That’s a wrap. Take the calm with you.';
+      }
+      let bestCombo = 0;
+      function answer(choice) {
+        if(!running || answering) return;
+        answering = true;
+        const correct = choice === card.dataset.answer;
+        count++;
+        if(correct) {
+          combo++; bestCombo=Math.max(bestCombo,combo); const earned = 100 + Math.min(combo-1,10)*20; score += earned;
+          $('feedback').textContent = combo >= 3 ? `YES! ${earned} POINTS · ×${combo} STREAK` : `NICE CALL · +${earned} POINTS`;
+          card.classList.add('good'); playTone(680 + Math.min(combo,8)*35,.075);
+          if(combo > 0 && combo % 5 === 0) showToast(`${combo} IN A ROW! +${earned}`);
+        } else {
+          combo=0; seconds=Math.max(0,seconds-2); $('feedback').textContent = `NOT QUITE · ${card.dataset.answer === 'focus' ? 'DO NOW' : card.dataset.answer === 'defer' ? 'LATER' : 'CLEAR'} WAS THE MOVE · −2 SEC`;
+          card.classList.add('bad'); playTone(180,.13); if(seconds <= 0) { updateUI(); endGame(); return; }
+        }
+        updateUI(); setTimeout(() => { if(running) nextTask(); },150);
+      }
+      function showToast(message) { const t=$('toast');t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1050); }
+      function playTone(freq,duration) { if(!soundOn)return; try { audio ||= new (window.AudioContext||window.webkitAudioContext)(); const osc=audio.createOscillator(),gain=audio.createGain();osc.type='sine';osc.frequency.value=freq;gain.gain.setValueAtTime(.055,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);osc.connect(gain);gain.connect(audio.destination);osc.start();osc.stop(audio.currentTime+duration); } catch(_){} }
+      buttons.forEach(b => b.addEventListener('click', () => answer(b.dataset.choice)));
+      $('startButton').addEventListener('click',startGame);
+      $('soundButton').addEventListener('click',() => { soundOn=!soundOn;$('soundButton').style.color=soundOn?'var(--lime)':'';$('soundButton').title=soundOn?'Sound on':'Sound off';$('soundButton').setAttribute('aria-label',soundOn?'Turn sound off':'Turn sound on');if(soundOn)playTone(540,.08); });
+      window.addEventListener('keydown',e => { if(e.repeat)return; if(e.key==='1')answer('focus');if(e.key==='2')answer('defer');if(e.key==='3')answer('clear');if(e.key==='Enter'&&!running)startGame(); });
+      updateUI();
+    })();
+  </script>
+</body>
+</html>
